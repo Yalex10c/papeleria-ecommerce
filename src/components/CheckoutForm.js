@@ -1,101 +1,218 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const CheckoutForm = ({ carrito }) => {
-  // Estado para el formulario
-  const [nombre, setNombre] = useState('');
-  const [direccion, setDireccion] = useState('');
-  const [metodoPago, setMetodoPago] = useState('');
-  const [mensajeExito, setMensajeExito] = useState('');
+const PaymentPage = ({ carrito }) => {
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  const [houseNumber, setHouseNumber] = useState('');
+  const [colony, setColony] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
+  const [cvv, setCvv] = useState('');
+  const [paypalEmail, setPaypalEmail] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  // Función para manejar la suma total de los productos
-  const calcularTotal = () => {
-    return carrito.reduce((total, producto) => total + producto.precio, 0).toFixed(2);
-  };
+  const navigate = useNavigate();
 
-  // Función para manejar el envío del formulario
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!nombre || !direccion || !metodoPago) {
-      alert('Por favor, completa todos los campos.');
-      return;
+    console.log('Nombre:', name);
+    console.log('Dirección:', `${address} #${houseNumber}, ${colony}, CP ${postalCode}`);
+    console.log('Método de pago:', paymentMethod);
+
+    if (paymentMethod === 'creditCard') {
+      console.log('Número de tarjeta:', cardNumber);
+      console.log('Fecha de expiración:', expiryDate);
+      console.log('CVV:', cvv);
+    } else if (paymentMethod === 'paypal') {
+      console.log('Correo de PayPal:', paypalEmail);
     }
 
-    // Aquí puedes enviar la información del pedido al backend (luego implementaremos esta parte).
-    // Por ahora, solo mostramos un mensaje de éxito.
-    setMensajeExito('¡Compra realizada con éxito!');
+    setSuccessMessage('¡Compra realizada con éxito!');
+  };
 
-    // Limpiar el formulario (opcional)
-    setNombre('');
-    setDireccion('');
-    setMetodoPago('');
+  const calcularTotal = () => {
+    return carrito?.reduce((total, producto) => total + producto.precio, 0).toFixed(2);
+  };
+
+  const goBack = () => {
+    navigate('/cart'
+    )
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Formulario de Compra</h1>
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      <header className="text-center mb-6">
+        <h1 className="text-2xl font-bold">Dirección y Método de Pago</h1>
+        <p className="text-gray-600">Completa los datos para finalizar tu compra.</p>
+      </header>
 
-      {mensajeExito && <p className="text-green-500">{mensajeExito}</p>}
+      {successMessage && (
+        <div className="bg-green-100 text-green-800 p-4 rounded mb-4 text-center">
+          {successMessage}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Nombre */}
+        {/* Datos de envío */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Nombre completo</label>
+          <label className="block font-semibold">Nombre del destinatario</label>
           <input
             type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
-
-        {/* Dirección */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Dirección de envío</label>
+          <label className="block font-semibold">Calle</label>
           <input
             type="text"
-            value={direccion}
-            onChange={(e) => setDireccion(e.target.value)}
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
             required
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+        <div className="flex space-x-4">
+          <div className="flex-1">
+            <label className="block font-semibold">Número</label>
+            <input
+              type="text"
+              value={houseNumber}
+              onChange={(e) => setHouseNumber(e.target.value)}
+              required
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block font-semibold">Colonia</label>
+            <input
+              type="text"
+              value={colony}
+              onChange={(e) => setColony(e.target.value)}
+              required
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block font-semibold">Código Postal</label>
+          <input
+            type="text"
+            value={postalCode}
+            onChange={(e) => setPostalCode(e.target.value)}
+            required
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
         {/* Método de pago */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Método de pago</label>
+          <label className="block font-semibold">Método de Pago</label>
           <select
-            value={metodoPago}
-            onChange={(e) => setMetodoPago(e.target.value)}
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
             required
+            className="w-full p-2 border border-gray-300 rounded"
           >
             <option value="">Selecciona un método</option>
-            <option value="tarjeta">Tarjeta de crédito</option>
+            <option value="creditCard">Tarjeta de Crédito</option>
             <option value="paypal">PayPal</option>
+            <option value="bankTransfer">Transferencia Bancaria</option>
           </select>
         </div>
 
+        {/* Campos dinámicos según método */}
+        {paymentMethod === 'creditCard' && (
+          <>
+            <div>
+              <label className="block font-semibold">Número de Tarjeta</label>
+              <input
+                type="text"
+                value={cardNumber}
+                onChange={(e) => setCardNumber(e.target.value)}
+                required
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <label className="block font-semibold">Expira (MM/AA)</label>
+                <input
+                  type="text"
+                  value={expiryDate}
+                  onChange={(e) => setExpiryDate(e.target.value)}
+                  required
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block font-semibold">CVV</label>
+                <input
+                  type="text"
+                  value={cvv}
+                  onChange={(e) => setCvv(e.target.value)}
+                  required
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {paymentMethod === 'paypal' && (
+          <div>
+            <label className="block font-semibold">Correo de PayPal</label>
+            <input
+              type="email"
+              value={paypalEmail}
+              onChange={(e) => setPaypalEmail(e.target.value)}
+              required
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+        )}
+
         {/* Resumen del carrito */}
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold">Resumen del Carrito</h2>
-          <ul>
-            {carrito.map((producto, index) => (
-              <li key={index} className="my-2">
-                {producto.nombre} - ${producto.precio}
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Resumen del Carrito</h2>
+          <ul className="border border-gray-300 rounded divide-y divide-gray-200">
+            {carrito?.map((producto, i) => (
+              <li key={i} className="flex justify-between p-2">
+                <span>{producto.nombre}</span>
+                <span>${producto.precio.toFixed(2)}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-2 font-bold">Total: ${calcularTotal()}</p>
+          <div className="text-right font-bold mt-2">
+            Total: ${calcularTotal()}
+          </div>
         </div>
 
-        <button type="submit" className="bg-blue-500 text-white py-2 px-4 mt-4 w-full hover:bg-blue-700">
-          Realizar Compra
+        {/* Botones */}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        >
+          Finalizar Compra
         </button>
       </form>
+
+       <div className="text-center mt-6">
+        <button
+          onClick={goBack}
+          className="text-gray-600 hover:underline"
+        >
+          ← Regresar
+        </button>
+      </div>
     </div>
-  );
+      );
 };
 
-export default CheckoutForm;
+export default PaymentPage;
