@@ -1,0 +1,88 @@
+CREATE DATABASE ecommerce;
+\c ecommerce;
+
+CREATE TABLE usuarios (
+    id_usuario SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    correo_electronico VARCHAR(100) UNIQUE,
+    contraseña_hash VARCHAR(255),
+    telefono VARCHAR(20),
+    direccion_envio TEXT,
+    tipo_usuario VARCHAR(10) CHECK (tipo_usuario IN ('cliente', 'admin')),
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de categorías
+CREATE TABLE categorias (
+    id_categoria SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    descripcion TEXT
+);
+
+-- Tabla de productos
+CREATE TABLE productos (
+    id_producto SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    descripcion TEXT,
+    precio NUMERIC(10,2),
+    stock INT,
+    imagen_url VARCHAR(255),
+    id_categoria INT REFERENCES categorias(id_categoria)
+);
+
+-- Tabla de métodos de pago
+CREATE TABLE metodos_pago (
+    id_metodo_pago SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    detalles TEXT
+);
+
+-- Tabla de pedidos
+CREATE TABLE pedidos (
+    id_pedido SERIAL PRIMARY KEY,
+    id_usuario INT REFERENCES usuarios(id_usuario),
+    fecha_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    estado VARCHAR(15) CHECK (estado IN ('pendiente', 'enviado', 'entregado', 'cancelado')),
+    id_metodo_pago INT REFERENCES metodos_pago(id_metodo_pago),
+    total NUMERIC(10,2)
+);
+
+-- Tabla detalle de pedido
+CREATE TABLE detalle_pedido (
+    id_detalle SERIAL PRIMARY KEY,
+    id_pedido INT REFERENCES pedidos(id_pedido),
+    id_producto INT REFERENCES productos(id_producto),
+    cantidad INT,
+    precio_unitario NUMERIC(10,2)
+);
+
+-- Tabla carrito
+CREATE TABLE carrito (
+    id_usuario INT PRIMARY KEY REFERENCES usuarios(id_usuario),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla detalle del carrito
+CREATE TABLE detalle_carrito (
+    id_usuario INT,
+    id_producto INT,
+    cantidad INT,
+    PRIMARY KEY (id_usuario, id_producto),
+    FOREIGN KEY (id_usuario) REFERENCES carrito(id_usuario),
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+);
+
+-- Tabla lista de deseos
+CREATE TABLE lista_deseos (
+    id_usuario INT PRIMARY KEY REFERENCES usuarios(id_usuario),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla detalle de lista de deseos
+CREATE TABLE detalle_lista_deseos (
+    id_usuario INT,
+    id_producto INT,
+    PRIMARY KEY (id_usuario, id_producto),
+    FOREIGN KEY (id_usuario) REFERENCES lista_deseos(id_usuario),
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+);
