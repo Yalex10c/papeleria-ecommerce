@@ -1,43 +1,62 @@
+-- Crear la base de datos
 CREATE DATABASE ecommerce;
+
+-- Conectarse a la base
 \c ecommerce;
 
+-- Tabla de usuarios
 CREATE TABLE usuarios (
     id_usuario SERIAL PRIMARY KEY,
-    nombre VARCHAR(100),
-    correo_electronico VARCHAR(100) UNIQUE,
-    contraseña_hash VARCHAR(255),
-    telefono VARCHAR(20),
-    direccion_envio TEXT,
-    tipo_usuario VARCHAR(10) CHECK (tipo_usuario IN ('cliente', 'admin')),
+    nombre VARCHAR(100) NOT NULL,
+    correo_electronico VARCHAR(100) UNIQUE NOT NULL,
+    contraseña_hash VARCHAR(255) NOT NULL,
+    telefono VARCHAR(20) NOT NULL,
+    direccion_envio TEXT NOT NULL,
+    tipo_usuario VARCHAR(10) CHECK (tipo_usuario IN ('cliente', 'admin')) NOT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de configuración de tienda (para personalización de tiendas)
+CREATE TABLE configuracion_tienda (
+    id_configuracion SERIAL PRIMARY KEY,
+    nombre_tienda VARCHAR(100),
+    logo_url TEXT,
+    tema_color VARCHAR(20),
+    mensaje_bienvenida TEXT
 );
 
 -- Tabla de categorías
 CREATE TABLE categorias (
     id_categoria SERIAL PRIMARY KEY,
-    nombre VARCHAR(100),
+    nombre VARCHAR(100) NOT NULL,
     descripcion TEXT
 );
 
--- Tabla de productos
+-- Agregar categorías por defecto
+INSERT INTO categorias (nombre, descripcion) VALUES
+('General', 'Categoría por defecto para productos'),
+('Papelería', 'Artículos escolares y de oficina'),
+('Tecnología', 'Accesorios tecnológicos y gadgets');
+
+-- Tabla de productos (obligatorio id_categoria)
 CREATE TABLE productos (
     id_producto SERIAL PRIMARY KEY,
-    nombre VARCHAR(100),
+    nombre VARCHAR(100) NOT NULL,
     descripcion TEXT,
-    precio NUMERIC(10,2),
-    stock INT,
+    precio NUMERIC(10,2) NOT NULL,
+    stock INT NOT NULL,
     imagen_url VARCHAR(255),
-    id_categoria INT REFERENCES categorias(id_categoria)
+    id_categoria INT NOT NULL REFERENCES categorias(id_categoria) ON DELETE RESTRICT
 );
 
--- Tabla de métodos de pago
+-- Métodos de pago
 CREATE TABLE metodos_pago (
     id_metodo_pago SERIAL PRIMARY KEY,
     nombre VARCHAR(100),
     detalles TEXT
 );
 
--- Tabla de pedidos
+-- Pedidos
 CREATE TABLE pedidos (
     id_pedido SERIAL PRIMARY KEY,
     id_usuario INT REFERENCES usuarios(id_usuario),
@@ -47,7 +66,7 @@ CREATE TABLE pedidos (
     total NUMERIC(10,2)
 );
 
--- Tabla detalle de pedido
+-- Detalle de pedidos
 CREATE TABLE detalle_pedido (
     id_detalle SERIAL PRIMARY KEY,
     id_pedido INT REFERENCES pedidos(id_pedido),
@@ -56,13 +75,13 @@ CREATE TABLE detalle_pedido (
     precio_unitario NUMERIC(10,2)
 );
 
--- Tabla carrito
+-- Carrito
 CREATE TABLE carrito (
     id_usuario INT PRIMARY KEY REFERENCES usuarios(id_usuario),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla detalle del carrito
+-- Detalle del carrito
 CREATE TABLE detalle_carrito (
     id_usuario INT,
     id_producto INT,
@@ -72,13 +91,13 @@ CREATE TABLE detalle_carrito (
     FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
 );
 
--- Tabla lista de deseos
+-- Lista de deseos
 CREATE TABLE lista_deseos (
     id_usuario INT PRIMARY KEY REFERENCES usuarios(id_usuario),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla detalle de lista de deseos
+-- Detalle de lista de deseos
 CREATE TABLE detalle_lista_deseos (
     id_usuario INT,
     id_producto INT,

@@ -40,12 +40,15 @@ router.post('/', async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(contraseña, saltRounds);
 
-    // Insertar usuario con contraseña hasheada
+    // Insertar usuario
     const insertQuery = `
       INSERT INTO usuarios (nombre, correo_electronico, contraseña_hash, telefono, direccion_envio, tipo_usuario)
       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id_usuario, nombre, correo_electronico, telefono, direccion_envio, tipo_usuario`;
     const values = [nombre, correo_electronico, hashedPassword, telefono, direccion_envio, tipo_usuario];
     const insertResult = await db.query(insertQuery, values);
+
+    // 🆕 Crear carrito automáticamente
+    await db.query('INSERT INTO carrito (id_usuario) VALUES ($1)', [insertResult.rows[0].id_usuario]);
 
     res.status(201).json(insertResult.rows[0]);
   } catch (error) {
@@ -59,7 +62,6 @@ router.post('/login', async (req, res) => {
   const { correo_electronico, contraseña } = req.body;
 
   try {
-    // Buscar usuario por correo
     const userQuery = 'SELECT * FROM usuarios WHERE correo_electronico = $1';
     const userResult = await db.query(userQuery, [correo_electronico]);
 
@@ -68,18 +70,23 @@ router.post('/login', async (req, res) => {
     }
 
     const user = userResult.rows[0];
-
-    // Comparar contraseña con hash
     const match = await bcrypt.compare(contraseña, user.contraseña_hash);
     if (!match) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    // Generar token JWT
     const tokenPayload = { id_usuario: user.id_usuario, tipo_usuario: user.tipo_usuario };
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token, usuario: { id_usuario: user.id_usuario, nombre: user.nombre, correo_electronico: user.correo_electronico, tipo_usuario: user.tipo_usuario } });
+    res.json({
+      token,
+      usuario: {
+        id_usuario: user.id_usuario,
+        nombre: user.nombre,
+        correo_electronico: user.correo_electronico,
+        tipo_usuario: user.tipo_usuario,
+      },
+    });
   } catch (error) {
     console.error('Error en login:', error);
     res.status(500).json({ error: 'Error interno' });
