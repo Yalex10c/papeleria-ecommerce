@@ -5,6 +5,8 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Cart from './pages/Cart';
 import CheckoutForm from './components/CheckoutForm';
+import LoginCliente from './pages/LoginCliente'; 
+import RegistroCliente from './pages/RegistroCliente';
 
 function App() {
   const [carrito, setCarrito] = useState(() => {
@@ -37,6 +39,9 @@ function App() {
         <Route path="/" element={<Home agregarAlCarrito={agregarAlCarrito} />} />
         <Route path="/cart" element={<Cart carrito={carrito} setCarrito={setCarrito} />} />
         <Route path="/checkout" element={<CheckoutForm carrito={carrito} />} />
+        <Route path="/login" element={<LoginCliente />} />
+        <Route path="/registro-cliente" element={<RegistroCliente />} />
+         <Route path="/cliente/home" element={<Home />} />
       </Routes>
     </Router>
   );
