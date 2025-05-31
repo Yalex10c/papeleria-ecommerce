@@ -8,8 +8,11 @@ import CheckoutForm from './components/CheckoutForm';
 import LoginCliente from './pages/LoginCliente'; 
 import RegistroCliente from './pages/RegistroCliente';
 
-
-
+//Admin
+import AdminHome from './pages/AdminHome'; 
+import AdminCategories from './pages/AdminCategories';
+import AdminProductos from './pages/AdminProductos';
+import AdminPedidos from './pages/AdminPedidos';
 function App() {
   const [carrito, setCarrito] = useState(() => {
     const almacenado = localStorage.getItem('carrito');
@@ -44,6 +47,13 @@ function App() {
         <Route path="/login" element={<LoginCliente />} />
         <Route path="/registro-cliente" element={<RegistroCliente />} />
         <Route path="/cliente/home" element={<Home />} />
+
+        <Route path="/admin" element={<AdminHome />} />
+        <Route path="/admin/categorias" element={<AdminCategories />} />
+        <Route path="/admin/productos" element={<AdminProductos />} />
+        <Route path="/admin/pedidos" element={<AdminPedidos />} />
+
+
 
 
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const LoginCliente = () => {
+const Login = () => {
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [mensaje, setMensaje] = useState('');
@@ -10,22 +10,28 @@ const LoginCliente = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:5000/api/usuarios/login', {
-       correo_electronico: correo,
-       contraseña: password,
-       tipo_usuario: 'cliente'
-     });
+        correo_electronico: correo,
+        contraseña: password,
+      });
 
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+
       setMensaje('Inicio de sesión exitoso ✅');
+
       setTimeout(() => {
-        window.location.href = '/cliente/home';
+        if (response.data.usuario.tipo_usuario === 'admin') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/cliente/home';
+        }
       }, 1000);
     } catch (error) {
-      setMensaje('❌ Error al iniciar sesión');
+      setMensaje(error.response?.data?.error || '❌ Error al iniciar sesión');
     }
   };
 
-  // Navegar a registro cliente
+  // Opcional: función para redirigir a registro cliente
   const handleRegistroClick = () => {
     window.location.href = '/registro-cliente';
   };
@@ -33,7 +39,7 @@ const LoginCliente = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión Cliente</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
         <input
           type="email"
           placeholder="Correo electrónico"
@@ -68,4 +74,4 @@ const LoginCliente = () => {
   );
 };
 
-export default LoginCliente;
+export default Login;
