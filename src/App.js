@@ -8,6 +8,8 @@ import CheckoutForm from './components/CheckoutForm';
 import LoginCliente from './pages/LoginCliente'; 
 import RegistroCliente from './pages/RegistroCliente';
 
+
+
 function App() {
   const [carrito, setCarrito] = useState(() => {
     const almacenado = localStorage.getItem('carrito');
@@ -41,7 +43,10 @@ function App() {
         <Route path="/checkout" element={<CheckoutForm carrito={carrito} />} />
         <Route path="/login" element={<LoginCliente />} />
         <Route path="/registro-cliente" element={<RegistroCliente />} />
-         <Route path="/cliente/home" element={<Home />} />
+        <Route path="/cliente/home" element={<Home />} />
+
+
+
       </Routes>
     </Router>
   );
