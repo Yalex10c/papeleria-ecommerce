@@ -8,17 +8,23 @@ const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_aqui'; // Usa var
 
 // Registrar usuario con contraseña hasheada y validaciones
 router.post('/', async (req, res) => {
-  const { nombre, correo_electronico, contraseña, telefono, direccion_envio, tipo_usuario } = req.body;
+  const { nombre, correo_electronico, contraseña, telefono, tipo_usuario } = req.body;
 
   // Validación campos obligatorios
-  if (!nombre || !correo_electronico || !contraseña || !telefono || !direccion_envio || !tipo_usuario) {
+  if (!nombre || !correo_electronico || !contraseña || !telefono || !tipo_usuario) {
     return res.status(400).json({ error: 'Por favor completa todos los campos obligatorios.' });
   }
+
 
   // Validar formato de email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(correo_electronico)) {
     return res.status(400).json({ error: 'Correo electrónico no válido.' });
+  }
+
+  // Validar teléfono mexicano: exactamente 10 dígitos numéricos
+  if (!/^\d{10}$/.test(telefono)) {
+    return res.status(400).json({ error: 'El teléfono debe contener exactamente 10 dígitos numéricos.' });
   }
 
   // Validar tipo_usuario
@@ -42,9 +48,11 @@ router.post('/', async (req, res) => {
 
     // Insertar usuario
     const insertQuery = `
-      INSERT INTO usuarios (nombre, correo_electronico, contraseña_hash, telefono, direccion_envio, tipo_usuario)
-      VALUES ($1, $2, $3, $4, $5, $6) RETURNING id_usuario, nombre, correo_electronico, telefono, direccion_envio, tipo_usuario`;
-    const values = [nombre, correo_electronico, hashedPassword, telefono, direccion_envio, tipo_usuario];
+  INSERT INTO usuarios (nombre, correo_electronico, contraseña_hash, telefono, tipo_usuario)
+  VALUES ($1, $2, $3, $4, $5)
+  RETURNING id_usuario, nombre, correo_electronico, telefono, tipo_usuario`;
+
+    const values = [nombre, correo_electronico, hashedPassword, telefono, tipo_usuario];
     const insertResult = await db.query(insertQuery, values);
 
     // 🆕 Crear carrito automáticamente

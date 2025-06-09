@@ -6,8 +6,7 @@ const RegistroCliente = () => {
     nombre: '',
     correo_electronico: '',
     contraseña: '',
-    telefono: '',
-    direccion_envio: '',
+    telefono: ''
   });
 
   const [mensaje, setMensaje] = useState('');
@@ -29,13 +28,13 @@ const RegistroCliente = () => {
 
     try {
       const response = await axios.post('http://localhost:5000/api/usuarios', dataToSend);
-      setMensaje('Registro exitoso ✅. Puedes iniciar sesión ahora.');
+      const { nombre } = response.data;
+      setMensaje(`¡Bienvenido ${nombre}! Puedes iniciar sesión ahora.`);
       setFormData({
         nombre: '',
         correo_electronico: '',
         contraseña: '',
-        telefono: '',
-        direccion_envio: '',
+        telefono: ''
       });
     } catch (err) {
       // Manejo básico de errores
@@ -84,24 +83,18 @@ const RegistroCliente = () => {
         />
 
         <input
-          type="text"
+          type="tel"
           name="telefono"
-          placeholder="Teléfono"
+          placeholder="Teléfono (10 dígitos)"
           className="w-full p-2 border mb-4 rounded"
           value={formData.telefono}
           onChange={handleChange}
           required
+          pattern="^\d{10}$"
+          title="Debe contener exactamente 10 dígitos"
         />
 
-        <textarea
-          name="direccion_envio"
-          placeholder="Dirección de envío"
-          className="w-full p-2 border mb-4 rounded"
-          value={formData.direccion_envio}
-          onChange={handleChange}
-          required
-          rows={3}
-        />
+
 
         <button type="submit" className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">
           Registrarse

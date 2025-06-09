@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// Obtener todas las categorías
+// Obtener todas las categorías (nombre, id y descripción si se requiere más adelante)
 router.get('/', async (req, res) => {
   try {
-    const result = await db.query('SELECT * FROM categorias');
-    res.json(result.rows);
+    const result = await db.query('SELECT id_categoria, nombre, descripcion FROM categorias ORDER BY nombre ASC');
+    res.json(result.rows); // Devuelve objetos completos, útiles si se necesita el ID también
   } catch (error) {
     console.error('Error al obtener categorías:', error);
     res.status(500).json({ error: 'Error interno' });
