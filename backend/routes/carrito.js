@@ -24,7 +24,7 @@ router.get('/', autenticarToken, async (req, res) => {
     const { id_usuario } = req.usuario;
 
     const query = `
-      SELECT p.id_producto, p.nombre, p.precio, dc.cantidad
+      SELECT p.id_producto, p.nombre, p.precio, p.imagen_url, dc.cantidad
       FROM detalle_carrito dc
       JOIN productos p ON p.id_producto = dc.id_producto
       WHERE dc.id_usuario = $1
@@ -43,7 +43,6 @@ router.post('/', autenticarToken, async (req, res) => {
     const { id_usuario } = req.usuario;
     const { id_producto, cantidad } = req.body;
 
-    // Si ya existe el producto en el carrito, actualizar cantidad
     const existe = await db.query(
       'SELECT * FROM detalle_carrito WHERE id_usuario = $1 AND id_producto = $2',
       [id_usuario, id_producto]
@@ -82,6 +81,29 @@ router.delete('/:id_producto', autenticarToken, async (req, res) => {
     res.json({ mensaje: 'Producto eliminado del carrito' });
   } catch (error) {
     console.error('Error al eliminar producto:', error);
+    res.status(500).json({ error: 'Error interno' });
+  }
+});
+
+// 4. Actualizar cantidad de un producto en el carrito
+router.put('/:id_producto', autenticarToken, async (req, res) => {
+  try {
+    const { id_usuario } = req.usuario;
+    const { id_producto } = req.params;
+    const { cantidad } = req.body;
+
+    if (cantidad < 1) {
+      return res.status(400).json({ error: 'Cantidad inválida' });
+    }
+
+    await db.query(
+      'UPDATE detalle_carrito SET cantidad = $1 WHERE id_usuario = $2 AND id_producto = $3',
+      [cantidad, id_usuario, id_producto]
+    );
+
+    res.json({ mensaje: 'Cantidad actualizada' });
+  } catch (error) {
+    console.error('Error al actualizar cantidad:', error);
     res.status(500).json({ error: 'Error interno' });
   }
 });

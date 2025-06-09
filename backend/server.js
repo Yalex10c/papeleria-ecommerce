@@ -17,7 +17,8 @@ const productosRouter = require('./routes/productos');
 const carritoRouter = require('./routes/carrito');
 const pedidosRouter = require('./routes/pedidos');
 const categoriasRouter = require('./routes/categorias');
-
+const metodosPagoRoutes = require('./routes/metodospago.js');
+const configuracionRoutes = require('./routes/configuracion');
 
 // Usar routers
 app.use('/api/usuarios', usuariosRouter);
@@ -25,6 +26,8 @@ app.use('/api/productos', productosRouter);
 app.use('/api/carrito', carritoRouter);
 app.use('/api/pedidos', pedidosRouter);
 app.use('/api/categorias', categoriasRouter);
+app.use('/api/metodospago', metodosPagoRoutes);
+app.use('/api/configuracion', configuracionRoutes);
 
 
 app.get('/', (req, res) => {

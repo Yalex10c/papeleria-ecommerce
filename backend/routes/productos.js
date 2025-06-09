@@ -2,10 +2,27 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// Obtener todos los productos
+// Obtener todos los productos o filtrados por categoría
 router.get('/', async (req, res) => {
+  const { categoria } = req.query;
+
   try {
-    const result = await db.query('SELECT * FROM productos');
+    let query;
+    let params;
+
+    if (categoria) {
+      query = `
+        SELECT p.* FROM productos p
+        JOIN categorias c ON p.id_categoria = c.id_categoria
+        WHERE c.nombre = $1
+      `;
+      params = [categoria];
+    } else {
+      query = 'SELECT * FROM productos';
+      params = [];
+    }
+
+    const result = await db.query(query, params);
     res.json(result.rows);
   } catch (error) {
     console.error('Error al obtener productos:', error);

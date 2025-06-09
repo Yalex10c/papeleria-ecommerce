@@ -49,6 +49,12 @@ const AdminHome = () => {
           >
             Crear Productos
           </div>
+          <div
+            onClick={() => navigate('/admin/configuracion')}
+            className="cursor-pointer bg-purple-500 text-white p-6 rounded shadow hover:bg-purple-600 text-center"
+          >
+            Configuración Tienda
+          </div>
         </nav>
       </section>
     </div>

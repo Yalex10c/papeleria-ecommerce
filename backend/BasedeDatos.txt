@@ -25,6 +25,11 @@ CREATE TABLE configuracion_tienda (
     mensaje_bienvenida TEXT
 );
 
+//Agregue esta parte porque cambie de lado la configuración de una cosa para el color y fuente de letra, también tiene que ser ejecutado cambio de 08/06/25
+ALTER TABLE configuracion_tienda
+ADD COLUMN color_nombre_tienda VARCHAR(20),
+ADD COLUMN fuente_nombre_tienda VARCHAR(100);
+
 -- Tabla de categorías
 CREATE TABLE categorias (
     id_categoria SERIAL PRIMARY KEY,
@@ -65,6 +70,41 @@ CREATE TABLE pedidos (
     id_metodo_pago INT REFERENCES metodos_pago(id_metodo_pago),
     total NUMERIC(10,2)
 );
+
+//Agregue esto como un cambio a la base de datos por problemas del formulario y demás. 
+ALTER TABLE pedidos
+ADD COLUMN nombre_destinatario VARCHAR(100) NOT NULL DEFAULT 'Por definir',
+ADD COLUMN calle VARCHAR(100) NOT NULL DEFAULT 'Por definir',
+ADD COLUMN numero_casa VARCHAR(20) NOT NULL DEFAULT 'S/N',
+ADD COLUMN colonia VARCHAR(100) NOT NULL DEFAULT 'Por definir',
+ADD COLUMN codigo_postal VARCHAR(10) NOT NULL DEFAULT '00000';
+
+✅ ¿Qué hiciste y por qué?
+🎯 Agregaste columnas para:
+nombre_destinatario
+
+calle
+
+numero_casa
+
+colonia
+
+codigo_postal
+
+Todas con NOT NULL y DEFAULT, lo cual:
+
+🔹 Permite que cada pedido tenga su propia dirección personalizada.
+🔹 Soluciona el problema de que un usuario pueda pedir a diferentes lugares.
+🔹 Asegura que los pedidos anteriores no generen errores, ya que usan valores por defecto.
+
+✅ ¿Por qué fue necesario?
+Porque:
+
+El formulario del checkout permite al usuario ingresar una dirección distinta cada vez.
+
+Guardar esa dirección solo en el perfil del usuario sería incorrecto (y hasta peligroso) en un sistema real.
+
+Esto te prepara para casos reales: envíos, mudanzas, regalos, múltiples direcciones por usuario.
 
 -- Detalle de pedidos
 CREATE TABLE detalle_pedido (
