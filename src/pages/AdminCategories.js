@@ -40,7 +40,7 @@ export default function AdminCategories() {
 
   const eliminarCategoria = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/categorias/${id}`);
+      await axios.delete(`https://papeleria-ecommerce.onrender.com/api/categorias/${id}`);
       setCategorias(categorias.filter((cat) => cat.id_categoria !== id));
       setMensaje('Categoría eliminada');
     } catch (error) {

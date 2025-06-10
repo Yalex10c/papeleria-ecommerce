@@ -14,7 +14,7 @@ function Cart() {
     const fetchCarrito = async () => {
       try {
         if (!token) return;
-        const response = await axios.get("http://localhost:5000/api/carrito", {
+        const response = await axios.get("https://papeleria-ecommerce.onrender.com/api/carrito", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const productos = response.data.map(p => ({
@@ -40,13 +40,13 @@ function Cart() {
 
   const actualizarCantidad = async (id_producto, nuevaCantidad) => {
     try {
-      await axios.put(`http://localhost:5000/api/carrito/${id_producto}`, {
+      await axios.put(`https://papeleria-ecommerce.onrender.com/api/carrito/${id_producto}`, {
         cantidad: nuevaCantidad,
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const response = await axios.get("http://localhost:5000/api/carrito", {
+      const response = await axios.get("https://papeleria-ecommerce.onrender.com/api/carrito", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCarrito(response.data);

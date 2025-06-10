@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/productos';
-const CATEGORIAS_URL = 'http://localhost:5000/api/categorias';
+const API_URL = 'https://papeleria-ecommerce.onrender.com/api/productos';
+const CATEGORIAS_URL = 'https://papeleria-ecommerce.onrender.com/api/categorias';
 
 const AdminProductos = () => {
   const navigate = useNavigate();

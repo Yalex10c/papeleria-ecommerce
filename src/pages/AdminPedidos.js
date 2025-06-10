@@ -12,7 +12,7 @@ const AdminPedidos = () => {
   const fetchPedidos = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/pedidos/admin', {
+      const res = await axios.get('https://papeleria-ecommerce.onrender.com/api/pedidos/admin', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPedidos(res.data);
@@ -31,7 +31,7 @@ const AdminPedidos = () => {
       const nuevoEstado = estadoEditando[id_pedido];
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:5000/api/pedidos/admin/${id_pedido}/estado`,
+        `https://papeleria-ecommerce.onrender.com/api/pedidos/admin/${id_pedido}/estado`,
         { estado: nuevoEstado },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -47,7 +47,7 @@ const AdminPedidos = () => {
   const verProductos = async (id_pedido) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:5000/api/pedidos/admin/${id_pedido}/detalle`, {
+      const res = await axios.get(`https://papeleria-ecommerce.onrender.com/api/pedidos/admin/${id_pedido}/detalle`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProductosPorPedido((prev) => ({

@@ -27,7 +27,7 @@ const RegistroCliente = () => {
     const dataToSend = { ...formData, tipo_usuario: 'cliente' };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/usuarios', dataToSend);
+      const response = await axios.post('https://papeleria-ecommerce.onrender.com/api/usuarios', dataToSend);
       const { nombre } = response.data;
       setMensaje(`¡Bienvenido ${nombre}! Puedes iniciar sesión ahora.`);
       setFormData({
