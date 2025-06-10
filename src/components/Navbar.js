@@ -12,11 +12,11 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/configuracion")
+    axios.get("https://papeleria-ecommerce.onrender.com/api/configuracion")
       .then(res => setConfig(res.data))
       .catch(err => console.error("Error config:", err));
 
-    axios.get("http://localhost:5000/api/categorias")
+    axios.get("https://papeleria-ecommerce.onrender.com/api/categorias")
       .then(res => setCategorias(res.data))
       .catch(err => console.error("Error categorías:", err));
   }, []);
