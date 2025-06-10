@@ -3,18 +3,16 @@ FROM node:20 AS build-frontend
 
 WORKDIR /app
 
-# Copiar archivos de dependencias primero para aprovechar cache
+# Copiar package.json y package-lock.json para cachear npm install
 COPY package*.json ./
 
 RUN npm install
 
-# Copiar todo el código fuente después
+# Copiar el código fuente completo necesario para el build
 COPY src/ ./src
-# Si tienes otros archivos (config, public, etc), cópialos también
-# COPY public ./public
-# COPY .babelrc ./
+COPY public/ ./public      
 
-RUN npm run build
+RUN npm run build          # Ejecuta el build (genera /app/build)
 
 # Etapa 2: Backend + frontend listo para producción
 FROM node:20
@@ -29,9 +27,11 @@ COPY package*.json ./
 
 RUN npm install
 
-# Copiar build del frontend generado (ajusta si tu build genera en 'build' en vez de 'dist')
+# Copiar build del frontend generado en la etapa anterior
 COPY --from=build-frontend /app/build ./public
 
+# Exponer puerto de la app
 EXPOSE 5000
 
+# Comando para iniciar backend
 CMD ["node", "server.js"]
