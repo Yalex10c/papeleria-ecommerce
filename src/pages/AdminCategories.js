@@ -25,7 +25,7 @@ export default function AdminCategories() {
   const crearCategoria = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/categorias', {
+      const res = await axios.post('https://papeleria-backend.onrender.com/api/categorias', {
         nombre,
         descripcion,
       });
@@ -40,7 +40,7 @@ export default function AdminCategories() {
 
   const eliminarCategoria = async (id) => {
     try {
-      await axios.delete(`https://papeleria-ecommerce.onrender.com/api/categorias/${id}`);
+      await axios.delete(`https://papeleria-backend.onrender.com/api/categorias/${id}`);
       setCategorias(categorias.filter((cat) => cat.id_categoria !== id));
       setMensaje('Categoría eliminada');
     } catch (error) {

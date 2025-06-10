@@ -19,8 +19,8 @@ const Home = () => {
     const fetchProductos = async () => {
       try {
         const endpoint = categoria
-          ? `https://papeleria-ecommerce.onrender.com/api/productos?categoria=${encodeURIComponent(categoria)}`
-          : 'https://papeleria-ecommerce.onrender.com/api/productos';
+          ? `https://papeleria-backend.onrender.com/api/productos?categoria=${encodeURIComponent(categoria)}`
+          : 'https://papeleria-backend.onrender.com/api/productos';
 
         const res = await axios.get(endpoint);
         setProductos(res.data);
@@ -35,14 +35,14 @@ const Home = () => {
   // Cargar carrito y configuración
   useEffect(() => {
     if (token) {
-      axios.get('https://papeleria-ecommerce.onrender.com/api/carrito', {
+      axios.get('https://papeleria-backend.onrender.com/api/carrito', {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => setCarrito(res.data))
         .catch(err => console.error('Error carrito:', err));
     }
 
-    axios.get('https://papeleria-ecommerce.onrender.com/api/configuracion')
+    axios.get('https://papeleria-backend.onrender.com/api/configuracion')
       .then(res => setConfig(res.data))
       .catch(err => console.error('Error configuración:', err));
   }, [token]);
@@ -50,14 +50,14 @@ const Home = () => {
   const agregarAlCarrito = async (producto) => {
     if (!token) return alert('Debes iniciar sesión para agregar productos');
     try {
-      await axios.post('https://papeleria-ecommerce.onrender.com/api/carrito', {
+      await axios.post('https://papeleria-backend.onrender.com/api/carrito', {
         id_producto: producto.id_producto,
         cantidad: 1
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const response = await axios.get('https://papeleria-ecommerce.onrender.com/api/carrito', {
+      const response = await axios.get('https://papeleria-backend.onrender.com/api/carrito', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCarrito(response.data);
@@ -69,11 +69,11 @@ const Home = () => {
   const eliminarDelCarrito = async (id_producto) => {
     if (!token) return alert('Debes iniciar sesión');
     try {
-      await axios.delete(`https://papeleria-ecommerce.onrender.com/api/carrito/${id_producto}`, {
+      await axios.delete(`https://papeleria-backend.onrender.com/api/carrito/${id_producto}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const response = await axios.get('https://papeleria-ecommerce.onrender.com/api/carrito', {
+      const response = await axios.get('https://papeleria-backend.onrender.com/api/carrito', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCarrito(response.data);

@@ -9,7 +9,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('https://papeleria-ecommerce.onrender.com/api/usuarios/login', {
+      const response = await axios.post('https://papeleria-backend.onrender.com/api/usuarios/login', {
         correo_electronico: correo,
         contraseña: password,
       });

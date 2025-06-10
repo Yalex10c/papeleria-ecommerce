@@ -17,7 +17,7 @@ const AdminConfiguracion = () => {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    fetch('https://papeleria-ecommerce.onrender.com/api/configuracion')
+    fetch('https://papeleria-backend.onrender.com/api/configuracion')
       .then(res => res.json())
       .then(data => setConfig(data))
       .catch(err => console.error('Error al obtener config:', err));
@@ -29,7 +29,7 @@ const AdminConfiguracion = () => {
 
   const handleGuardar = async () => {
     try {
-      const response = await fetch('https://papeleria-ecommerce.onrender.com/api/configuracion', {
+      const response = await fetch('https://papeleria-backend.onrender.com/api/configuracion', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

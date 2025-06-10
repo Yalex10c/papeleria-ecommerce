@@ -9,7 +9,7 @@ const HistorialPedidos = () => {
   useEffect(() => {
     const fetchHistorial = async () => {
       try {
-        const response = await axios.get("https://papeleria-ecommerce.onrender.com/api/pedidos/historial", {
+        const response = await axios.get("https://papeleria-backend.onrender.com/api/pedidos/historial", {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPedidos(response.data);

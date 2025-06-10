@@ -23,7 +23,7 @@ const CheckoutForm = () => {
 
     setToken(storedToken);
 
-    fetch('https://papeleria-ecommerce.onrender.com/api/carrito', {
+    fetch('https://papeleria-backend.onrender.com/api/carrito', {
       headers: { 'Authorization': `Bearer ${storedToken}` }
     })
       .then(res => res.json())
@@ -62,7 +62,7 @@ const CheckoutForm = () => {
     };
 
     try {
-      const response = await fetch('https://papeleria-ecommerce.onrender.com/api/pedidos', {
+      const response = await fetch('https://papeleria-backend.onrender.com/api/pedidos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
