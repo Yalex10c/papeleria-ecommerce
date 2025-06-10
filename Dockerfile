@@ -17,21 +17,18 @@ RUN npm run build          # Ejecuta el build (genera /app/build)
 # Etapa 2: Backend + frontend listo para producción
 FROM node:20
 
-WORKDIR /app
+WORKDIR /app/backend
 
 # Copiar package.json y package-lock.json para instalar dependencias
 COPY backend/package*.json ./
 
 RUN npm install
 
-# Copiar archivos backend necesarios
-COPY backend/db.js ./
-COPY backend/server.js ./
-COPY backend/routes ./routes
-COPY backend/middleware ./middleware
+# Copiar todo el backend (db.js, server.js, routes, middleware, etc.)
+COPY backend/ ./
 
-# Copiar build frontend generado
-COPY --from=build-frontend /app/build ./public
+# Copiar build frontend generado en carpeta pública para servirlo
+COPY --from=build-frontend /app/build ../public
 
 EXPOSE 5000
 
