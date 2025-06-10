@@ -19,7 +19,6 @@ WORKDIR /app
 COPY backend/server.js ./
 COPY backend/routes ./routes
 COPY backend/middleware ./middleware  
-COPY .env ./
 COPY package*.json ./
 
 RUN npm install
