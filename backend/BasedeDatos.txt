@@ -79,6 +79,14 @@ ADD COLUMN numero_casa VARCHAR(20) NOT NULL DEFAULT 'S/N',
 ADD COLUMN colonia VARCHAR(100) NOT NULL DEFAULT 'Por definir',
 ADD COLUMN codigo_postal VARCHAR(10) NOT NULL DEFAULT '00000';
 
+ALTER TABLE pedidos
+DROP CONSTRAINT pedidos_estado_check;
+
+ALTER TABLE pedidos
+ADD CONSTRAINT pedidos_estado_check
+CHECK (estado IN ('pendiente', 'procesado', 'enviado', 'entregado', 'cancelado'));
+
+
 ✅ ¿Qué hiciste y por qué?
 🎯 Agregaste columnas para:
 nombre_destinatario

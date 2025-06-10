@@ -1,151 +1,183 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+// backend/routes/pedidos.js
+const express = require('express');
+const router = express.Router();
+const db = require('../db');
+const authenticateToken = require('../middleware/auth');
 
-const AdminPedidos = () => {
-  const [pedidos, setPedidos] = useState([]);
-  const [detalles, setDetalles] = useState({});
-  const navigate = useNavigate();
+// Crear pedido desde carrito
+router.post('/', authenticateToken, async (req, res) => {
+  const userId = req.user.id_usuario;
+  const { id_metodo_pago, name, address, houseNumber, colony, postalCode } = req.body;
 
-  const fetchPedidos = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/pedidos/admin', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPedidos(res.data);
-    } catch (error) {
-      console.error('Error al obtener pedidos:', error);
+  if (!name || !address || !houseNumber || !colony || !postalCode) {
+    return res.status(400).json({ error: 'Todos los campos de dirección son obligatorios' });
+  }
+
+  try {
+    const productos = await db.query(`
+      SELECT p.id_producto, p.precio, p.stock, p.nombre, dc.cantidad 
+      FROM detalle_carrito dc
+      JOIN productos p ON p.id_producto = dc.id_producto
+      WHERE dc.id_usuario = $1`, [userId]);
+
+    if (productos.rows.length === 0) {
+      return res.status(400).json({ error: 'El carrito está vacío' });
     }
-  };
 
-  useEffect(() => {
-    fetchPedidos();
-  }, []);
-
-  const cambiarEstado = async (id_pedido, nuevoEstado) => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.put(
-        `http://localhost:5000/api/pedidos/admin/${id_pedido}/estado`,
-        { estado: nuevoEstado },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      fetchPedidos(); // recarga el listado
-    } catch (error) {
-      console.error('Error al cambiar estado:', error);
-    }
-  };
-
-  const toggleDetalle = async (id_pedido) => {
-    if (detalles[id_pedido]) {
-      setDetalles((prev) => ({ ...prev, [id_pedido]: null }));
-    } else {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:5000/api/pedidos/admin/${id_pedido}/detalle`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setDetalles((prev) => ({ ...prev, [id_pedido]: res.data }));
-      } catch (error) {
-        console.error('Error al obtener detalle del pedido:', error);
+    for (const item of productos.rows) {
+      if (item.stock < item.cantidad) {
+        return res.status(400).json({ error: `Stock insuficiente para: ${item.nombre}` });
       }
     }
-  };
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Gestión de Pedidos</h1>
-        <button
-          onClick={() => navigate('/admin')}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Regresar al Panel
-        </button>
-      </header>
+    const total = productos.rows.reduce((acc, prod) => acc + prod.precio * prod.cantidad, 0);
 
-      <section className="bg-white p-6 rounded shadow">
-        {pedidos.length === 0 ? (
-          <p className="text-gray-500">No hay pedidos registrados.</p>
-        ) : (
-          <table className="min-w-full table-auto mb-8">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="px-4 py-2">ID</th>
-                <th className="px-4 py-2">Usuario</th>
-                <th className="px-4 py-2">Destinatario</th>
-                <th className="px-4 py-2">Total</th>
-                <th className="px-4 py-2">Estado</th>
-                <th className="px-4 py-2">Fecha</th>
-                <th className="px-4 py-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pedidos.map((pedido) => (
-                <React.Fragment key={pedido.id_pedido}>
-                  <tr className="text-center border-b">
-                    <td className="px-4 py-2">{pedido.id_pedido}</td>
-                    <td className="px-4 py-2">{pedido.nombre_usuario}</td>
-                    <td className="px-4 py-2">{pedido.nombre_destinatario}</td>
-                    <td className="px-4 py-2">
-                      ${Number(pedido.total || 0).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-2">
-                      <select
-                        value={pedido.estado}
-                        onChange={(e) => cambiarEstado(pedido.id_pedido, e.target.value)}
-                        className="border rounded p-1 text-sm"
-                      >
-                        <option value="pendiente">Pendiente</option>
-                        <option value="enviado">Enviado</option>
-                        <option value="entregado">Entregado</option>
-                        <option value="cancelado">Cancelado</option>
-                      </select>
-                    </td>
-                    <td className="px-4 py-2">{new Date(pedido.fecha_pedido).toLocaleString()}</td>
-                    <td className="px-4 py-2">
-                      <button
-                        onClick={() => toggleDetalle(pedido.id_pedido)}
-                        className="bg-gray-300 hover:bg-gray-400 px-2 py-1 text-sm rounded"
-                      >
-                        {detalles[pedido.id_pedido] ? 'Ocultar' : 'Ver productos'}
-                      </button>
-                    </td>
-                  </tr>
+    const pedidoResult = await db.query(`
+      INSERT INTO pedidos (
+        id_usuario, id_metodo_pago, total, estado,
+        nombre_destinatario, calle, numero_casa, colonia, codigo_postal
+      ) VALUES ($1, $2, $3, 'pendiente', $4, $5, $6, $7, $8)
+      RETURNING id_pedido`,
+      [userId, id_metodo_pago, total, name, address, houseNumber, colony, postalCode]
+    );
 
-                  {detalles[pedido.id_pedido] && (
-                    <tr>
-                      <td colSpan="7" className="px-4 py-2 bg-gray-50">
-                        <div className="space-y-2">
-                          {detalles[pedido.id_pedido].map((producto, index) => (
-                            <div key={index} className="flex items-center gap-4 border-b py-2">
-                              <img
-                                src={producto.imagen_url}
-                                alt={producto.nombre}
-                                className="w-12 h-12 object-contain"
-                              />
-                              <div>
-                                <p className="font-semibold">{producto.nombre}</p>
-                                <p>Cantidad: {producto.cantidad}</p>
-                                <p>Precio unitario: ${Number(producto.precio_unitario).toFixed(2)}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
-    </div>
-  );
-};
+    const id_pedido = pedidoResult.rows[0].id_pedido;
 
-export default AdminPedidos;
+    for (const item of productos.rows) {
+      await db.query(`
+        INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario)
+        VALUES ($1, $2, $3, $4)`,
+        [id_pedido, item.id_producto, item.cantidad, item.precio]
+      );
+
+      await db.query(`
+        UPDATE productos SET stock = stock - $1 WHERE id_producto = $2`,
+        [item.cantidad, item.id_producto]
+      );
+    }
+
+    await db.query('DELETE FROM detalle_carrito WHERE id_usuario = $1', [userId]);
+
+    res.status(201).json({ message: 'Pedido creado correctamente', id_pedido });
+  } catch (error) {
+    console.error('Error al crear pedido:', error);
+    res.status(500).json({ error: 'Error interno' });
+  }
+});
+
+// Obtener pedidos del usuario autenticado
+router.get('/', authenticateToken, async (req, res) => {
+  const userId = req.user.id_usuario;
+
+  try {
+    const pedidosResult = await db.query(`
+      SELECT * FROM pedidos WHERE id_usuario = $1 ORDER BY fecha_pedido DESC`,
+      [userId]
+    );
+    res.json(pedidosResult.rows);
+  } catch (error) {
+    console.error('Error al obtener pedidos:', error);
+    res.status(500).json({ error: 'Error interno' });
+  }
+});
+
+// Obtener todos los pedidos (admin)
+router.get('/admin', authenticateToken, async (req, res) => {
+  if (req.user.tipo_usuario !== 'admin') {
+    return res.status(403).json({ error: 'Acceso denegado' });
+  }
+
+  try {
+    const pedidos = await db.query(`
+      SELECT 
+        p.id_pedido,
+        p.fecha_pedido,
+        p.estado,
+        p.total,
+        u.nombre AS nombre_usuario,
+        p.nombre_destinatario
+      FROM pedidos p
+      JOIN usuarios u ON p.id_usuario = u.id_usuario
+      ORDER BY p.fecha_pedido DESC
+    `);
+
+    res.json(pedidos.rows);
+  } catch (error) {
+    console.error('Error al obtener pedidos (admin):', error);
+    res.status(500).json({ error: 'Error interno' });
+  }
+});
+
+// Obtener productos de un pedido
+router.get('/admin/:id/detalle', authenticateToken, async (req, res) => {
+  if (req.user.tipo_usuario !== 'admin') {
+    return res.status(403).json({ error: 'Acceso denegado' });
+  }
+
+  const id_pedido = req.params.id;
+
+  try {
+    const detalle = await db.query(`
+      SELECT dp.id_producto, p.nombre, p.imagen_url, dp.cantidad, dp.precio_unitario
+      FROM detalle_pedido dp
+      JOIN productos p ON p.id_producto = dp.id_producto
+      WHERE dp.id_pedido = $1`,
+      [id_pedido]
+    );
+
+    res.json(detalle.rows);
+  } catch (error) {
+    console.error('Error al obtener detalle de pedido:', error);
+    res.status(500).json({ error: 'Error interno al obtener detalle' });
+  }
+});
+
+// Cambiar estado del pedido
+router.put('/admin/:id/estado', authenticateToken, async (req, res) => {
+  if (req.user.tipo_usuario !== 'admin') {
+    return res.status(403).json({ error: 'Acceso denegado' });
+  }
+
+  const id_pedido = req.params.id;
+  const { estado } = req.body;
+
+  try {
+    await db.query(
+      `UPDATE pedidos SET estado = $1 WHERE id_pedido = $2`,
+      [estado, id_pedido]
+    );
+    res.json({ message: 'Estado actualizado correctamente' });
+  } catch (error) {
+    console.error('Error al actualizar estado del pedido:', error);
+    res.status(500).json({ error: 'Error al actualizar estado' });
+  }
+});
+
+// Historial detallado del usuario
+router.get('/historial', authenticateToken, async (req, res) => {
+  const userId = req.user.id_usuario;
+
+  try {
+    const historial = await db.query(`
+      SELECT 
+        p.id_pedido, p.fecha_pedido, p.total, p.estado,
+        p.nombre_destinatario, p.calle, p.numero_casa, p.colonia, p.codigo_postal,
+        mp.nombre AS metodo_pago,
+        dp.id_producto, pr.nombre, pr.imagen_url, dp.cantidad, dp.precio_unitario
+      FROM pedidos p
+      JOIN detalle_pedido dp ON dp.id_pedido = p.id_pedido
+      JOIN productos pr ON pr.id_producto = dp.id_producto
+      JOIN metodos_pago mp ON mp.id_metodo_pago = p.id_metodo_pago
+      WHERE p.id_usuario = $1
+      ORDER BY p.fecha_pedido DESC`,
+      [userId]
+    );
+
+    res.json(historial.rows);
+  } catch (error) {
+    console.error('Error al obtener historial:', error);
+    res.status(500).json({ error: 'Error interno al obtener historial' });
+  }
+});
+
+module.exports = router;

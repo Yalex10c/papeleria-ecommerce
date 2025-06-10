@@ -8,13 +8,12 @@ const AdminPedidos = () => {
   const [estadoEditando, setEstadoEditando] = useState({});
   const navigate = useNavigate();
 
+  // Obtener pedidos al cargar
   const fetchPedidos = async () => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.get('http://localhost:5000/api/pedidos/admin', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setPedidos(res.data);
     } catch (error) {
@@ -26,6 +25,7 @@ const AdminPedidos = () => {
     fetchPedidos();
   }, []);
 
+  // Guardar cambio de estado
   const cambiarEstado = async (id_pedido) => {
     try {
       const nuevoEstado = estadoEditando[id_pedido];
@@ -43,6 +43,7 @@ const AdminPedidos = () => {
     }
   };
 
+  // Ver productos por pedido
   const verProductos = async (id_pedido) => {
     try {
       const token = localStorage.getItem('token');
