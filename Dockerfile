@@ -19,19 +19,19 @@ FROM node:20
 
 WORKDIR /app
 
-# Copiar archivos del backend
-COPY backend/server.js ./
-COPY backend/routes ./routes
-COPY backend/middleware ./middleware  
-COPY package*.json ./
+# Copiar package.json y package-lock.json del backend para instalar dependencias
+COPY backend/package*.json ./
 
 RUN npm install
 
-# Copiar build del frontend generado en la etapa anterior
+# Copiar el resto del backend
+COPY backend/server.js ./
+COPY backend/routes ./routes
+COPY backend/middleware ./middleware  
+
+# Copiar build del frontend generado
 COPY --from=build-frontend /app/build ./public
 
-# Exponer puerto de la app
 EXPOSE 5000
 
-# Comando para iniciar backend
 CMD ["node", "server.js"]
