@@ -4,20 +4,19 @@ FROM node:18
 # Crear directorio de trabajo dentro del contenedor
 WORKDIR /usr/src/app
 
-# Copiar los archivos de dependencias del backend
-COPY backend/package*.json ./backend/
+# Copiar y instalar dependencias del frontend
+COPY frontend/package*.json ./frontend/
+RUN cd frontend && npm install && npm run build
 
-# Instalar dependencias del backend
+# Copiar y instalar dependencias del backend
+COPY backend/package*.json ./backend/
 RUN cd backend && npm install
 
 # Copiar todo el proyecto
 COPY . .
 
-# Construir frontend (si usas React u otro build)
-RUN npm install && npm run build
-
-# Exponer el puerto en el que corre Express (ajústalo si usas otro)
+# Exponer el puerto en el que corre el backend (Express)
 EXPOSE 3000
 
 # Comando para ejecutar el backend
-CMD ["node", "backend/app.js"]
+CMD ["node", "backend/server.js"]

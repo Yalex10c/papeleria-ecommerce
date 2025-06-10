@@ -12,7 +12,7 @@ pipeline {
   stages {
     stage('Clonar proyecto') {
       steps {
-        git url: 'https://github.com/Yalex10c/papeleria-ecommerce.git', branch: 'main'
+        git url: 'https://github.com/Yalex10c/papeleria-ecommerce.git', branch: 'master'
       }
     }
 
