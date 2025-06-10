@@ -15,7 +15,7 @@ export default function AdminCategories() {
 
   const cargarCategorias = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/categorias');
+      const res = await axios.get('https://papeleria-frontend.onrender.com//api/categorias');
       setCategorias(res.data);
     } catch (error) {
       setMensaje('Error al cargar categorías');

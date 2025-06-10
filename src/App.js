@@ -45,7 +45,7 @@ function App() {
     // Enviar al backend solo si hay token
     if (token) {
       try {
-        await fetch('https://papeleria-ecommerce.onrender.com/api/carrito', {
+        await fetch('https://papeleria-backend.onrender.com/api/carrito', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
