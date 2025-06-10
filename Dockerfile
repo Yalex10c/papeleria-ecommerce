@@ -1,28 +1,31 @@
-# Imagen base oficial de Node
+# Etapa 1: construir el frontend
+FROM node:18 AS build-frontend
+WORKDIR /app/frontend
+COPY frontend/ .
+RUN npm install
+RUN npm run build
+
+# Etapa 2: configurar backend + servir frontend
 FROM node:18
+WORKDIR /app
 
-# Crear directorio de trabajo dentro del contenedor
-WORKDIR /usr/src/app
-
-# Copiar todo el proyecto al directorio de trabajo
-COPY . .
+# Copiar backend
+COPY backend/ ./backend
 
 # Instalar dependencias del backend
-WORKDIR /usr/src/app/backend
+WORKDIR /app/backend
 RUN npm install
 
-# Instalar dependencias del frontend
-WORKDIR /usr/src/app/src
-RUN npm install
+# Instalar 'serve' para mostrar el frontend
+RUN npm install -g serve
 
-# Volver a la raíz del proyecto
-WORKDIR /usr/src/app
+# Copiar el frontend ya compilado desde la etapa anterior
+COPY --from=build-frontend /app/frontend/build /app/frontend-build
 
-# Instalar "concurrently" globalmente para correr ambos servidores
-RUN npm install -g concurrently
+# Exponer puerto del frontend (3000) y backend (opcional)
+EXPOSE 3000
 
-# Exponer puertos necesarios
-EXPOSE 3000 5173
-
-# Ejecutar backend y frontend simultáneamente
-CMD concurrently "cd backend && node server.js" "cd src && npm start"
+# Iniciar backend y frontend simultáneamente
+CMD concurrently \
+  "cd /app/backend && node server.js" \
+  "serve -s /app/frontend-build -l 3000"
