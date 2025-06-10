@@ -1,23 +1,57 @@
-# Imagen base oficial de Node
-FROM node:18
+# --- BACKEND ---
+FROM node:18-alpine AS backend
 
-# Crear directorio de trabajo dentro del contenedor
-WORKDIR /app
+WORKDIR /app/backend
 
-# Copiar archivos del proyecto
-COPY . .
+# Copia archivos de dependencias del backend
+COPY backend/package*.json ./
 
-# Instalar dependencias del frontend
-WORKDIR /app/src
+# Instala dependencias del backend (incluyendo devDependencies para construcción)
 RUN npm install
+
+# Copia el resto del backend
+COPY backend/ .
+
+# Variables de entorno (ajusta según tu .env)
+ENV NODE_ENV=production
+ENV PORT=3001
+
+# Puerto expuesto para el backend
+EXPOSE 3001
+
+# --- FRONTEND ---
+FROM node:18-alpine AS frontend
+
+WORKDIR /app/frontend
+
+# Copia archivos de dependencias del frontend
+COPY frontend/package*.json ./
+
+RUN npm install
+
+# Copia el resto del frontend
+COPY frontend/ .
+
+# Construye la app React
 RUN npm run build
 
-# Instalar servidor HTTP estático para servir la app de React
-RUN npm install -g serve
+# --- PRODUCCIÓN ---
+FROM node:18-alpine
 
-# Establecer el directorio de salida del build
-WORKDIR /app/src
-EXPOSE 3000
+WORKDIR /app
 
-# Comando para servir la app
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Copia el backend desde la etapa de backend
+COPY --from=backend /app/backend ./backend
+
+# Copia el frontend construido desde la etapa de frontend
+COPY --from=frontend /app/frontend/build ./frontend/build
+
+# Instala solo production dependencies para el backend
+WORKDIR /app/backend
+RUN npm install --only=production
+
+# Expone puertos (backend:3001, frontend:3000)
+EXPOSE 3001 3000
+
+# Comando para iniciar (ajusta según tu configuración)
+CMD ["node", "npm start"]
