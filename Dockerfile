@@ -19,17 +19,18 @@ FROM node:20
 
 WORKDIR /app
 
-# Copiar package.json y package-lock.json del backend para instalar dependencias
+# Copiar package.json y package-lock.json para instalar dependencias
 COPY backend/package*.json ./
 
 RUN npm install
 
-# Copiar el resto del backend
+# Copiar archivos backend necesarios
+COPY backend/db.js ./
 COPY backend/server.js ./
 COPY backend/routes ./routes
-COPY backend/middleware ./middleware  
+COPY backend/middleware ./middleware
 
-# Copiar build del frontend generado
+# Copiar build frontend generado
 COPY --from=build-frontend /app/build ./public
 
 EXPOSE 5000
