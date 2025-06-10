@@ -3,15 +3,14 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 
-
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true })); 
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Importar routers
+// Rutas API
 const usuariosRouter = require('./routes/usuarios');
 const productosRouter = require('./routes/productos');
 const carritoRouter = require('./routes/carrito');
@@ -20,7 +19,6 @@ const categoriasRouter = require('./routes/categorias');
 const metodosPagoRoutes = require('./routes/metodospago.js');
 const configuracionRoutes = require('./routes/configuracion');
 
-// Usar routers
 app.use('/api/usuarios', usuariosRouter);
 app.use('/api/productos', productosRouter);
 app.use('/api/carrito', carritoRouter);
@@ -29,20 +27,20 @@ app.use('/api/categorias', categoriasRouter);
 app.use('/api/metodospago', metodosPagoRoutes);
 app.use('/api/configuracion', configuracionRoutes);
 
-
+// Mensaje simple para probar conexión
 app.get('/', (req, res) => {
   res.send('¡Servidor backend en funcionamiento!');
 });
 
-app.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${port}`);
-});
+// Servir frontend
 const path = require('path');
-
-// Servir archivos estáticos desde /public (donde se copiará el build del frontend)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Enviar index.html para rutas no API (React Router)
+// React Router: enviar index.html para rutas no API
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(port, () => {
+  console.log(`Servidor escuchando en http://localhost:${port}`);
 });
