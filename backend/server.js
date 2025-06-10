@@ -37,3 +37,12 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);
 });
+const path = require('path');
+
+// Servir archivos estáticos desde /public (donde se copiará el build del frontend)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Enviar index.html para rutas no API (React Router)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
