@@ -9,7 +9,6 @@
 /coverage
 
 # production
-/build
 !build/_redirects
 
 # misc
